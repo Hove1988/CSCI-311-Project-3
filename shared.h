@@ -21,7 +21,6 @@
 #define PLAYER_COMPUTER 'O'
 #define PLAYER_HUMAN 'X'
 
-#include "shared.c"
 
 void print_info(const char *msg);
 void print_error(const char *msg);

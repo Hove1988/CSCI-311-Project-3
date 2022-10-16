@@ -101,7 +101,7 @@ void make_move(int serverSocket){
 
     char buffer[10];
     for (int i=0; i<3; i++){
-        printf(" %i | %i | %i \n", i*3, i*3+1, i*3+2);
+        printf(" %i | %i | %i \n", i*3, (i*3)+1, (i*3)+2);
         if (i < 2){
             printf("-----------\n");
         }
