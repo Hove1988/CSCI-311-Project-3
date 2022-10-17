@@ -23,7 +23,8 @@ int main(int argc, char argv[]){
 
     char board[3][3] = {{' ',' ',' '},{' ',' ',' '},{' ',' ',' '}};
     int err;
-    char* serverIP = argv[1];
+    char* serverIP;
+    strcpy(serverIP, argv[1]);
     int port = atoi(argv[2]);
     struct sockaddr_in sAddr;
     int sSock = socket ( AF_INET, SOCK_STREAM, 0); // AF_INET
@@ -44,42 +45,44 @@ int main(int argc, char argv[]){
     pinfo(" Connection successful.");
     draw_board(board);
 
+    int msg;
     int exit = 0;
     while(!exit){
+        msg = get_int(sSock);
         switch (msg){
             case COMMAND_DRAW:
                 printf("You tied!\n");
-                exitFlag = 1;
+                exit = 1;
                 break;
             case COMMAND_END:
                 printf("The game has ended.\n");
-                exitFlag = 1;
+                exit = 1;
                 break;
             case COMMAND_INVALID:
                 printf("That move is invalid.\n");
                 break;
             case COMMAND_LOSE:
                 printf("You lost.\n");
-                exitFlag = 1;
+                exit = 1;
                 break;
             case COMMAND_MOVE:
                 printf("It's your turn.\n");
-                make_move(serverSocket);
+                make_move(sSock);
                 break;
             case COMMAND_START:
                 printf("The game has started!\n");
                 break;
             case COMMAND_UPDATE:
-                get_board_update(serverSocket, board);
+                get_board_update(sSock, board);
                 draw_board(board);
                 break;
             case COMMAND_WIN:
                 printf("You win!\n");
-                exitFlag = 1;
+                exit = 1;
                 break;
             default:
-                display_error("Unknown message.\n");
-                exitFlag = 1;
+                perror("Unknown message.\n");
+                exit = 1;
                 break;
         }
     }
@@ -91,8 +94,8 @@ int main(int argc, char argv[]){
 
 void get_board_update(int serverSocket, char board[][3]){
 
-    int player = receive_int(serverSocket);
-    int move = receive_int(serverSocket);
+    int player = get_int(serverSocket);
+    int move = get_int(serverSocket);
     board[move/3][move%3] = (char)player;
 
 }
@@ -100,12 +103,15 @@ void get_board_update(int serverSocket, char board[][3]){
 void make_move(int serverSocket){
 
     char buffer[10];
-    for (int i=0; i<3; i++){
+    int i = 0;
+    while (i<3){
         printf(" %i | %i | %i \n", i*3, (i*3)+1, (i*3)+2);
         if (i < 2){
             printf("-----------\n");
         }
+        i++;
     }
+    i = 0;
 
     printf("Enter 0-8 to make a move, 9 to forfeit.\n");
     fgets(buffer, 10, stdin);

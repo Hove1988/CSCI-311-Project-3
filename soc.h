@@ -29,4 +29,40 @@
 #define BUFL 100
 #define MAX_REQ 5
 
+
+int serverSocket( int port){
+    int sSocket;
+    struct sockaddr_in sAddr;
+     
+    if (sSocket = socket ( AF_INET, SOCK_STREAM, 0) < 0) {
+        perror ("socserver: socket creation failed");
+    }
+
+    memset(&sAddr, 0, sizeof(sAddr)); // Empty
+	sAddr.sin_family = AF_INET;
+	sAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	sAddr.sin_port = htons(port);
+    
+	int err = bind(serverSocket, (struct sockaddr*) &sAddr, sizeof(sAddr));
+    if (err){
+		display_error("Bind failed.");
+    }
+    return sSocket;
+}
+
+int clientSocket(int serverPort){
+    
+    int cSocket;
+    struct sockaddr_in cAddr;
+    unsigned int cLen = sizeof(cAddr);
+
+    cSocket = accept(serverSocket, (struct sockaddr *) &cAddr, &cLen); 
+    if (cSocket == -1) {
+        perror ("failed to connect to client");
+        exit (1);
+    }
+    return cSocket;
+}
+
+
 #endif
