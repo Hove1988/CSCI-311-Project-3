@@ -9,7 +9,9 @@
 *********************************************************************************/
 
 #include "soc.h"
+#include "shared.h"
 
+void exitSignalHandler();
 unsigned int ACTIVE_CLIENTS = 0;
 
 int main(int argc, char argv[]){
@@ -20,52 +22,62 @@ int main(int argc, char argv[]){
     }
 //General Delcaring variables.
     int err;
-    int scSocket; //server c socket
+    int sSocket; // server socket
     int cSocket; // client socket
 
-    unsigned short serverPort = atoi(argv[1]);
+    unsigned short port = atoi(argv[1]);
 
+    struct sigaction sigHandler;
     struct sockaddr_in sAddr;
     struct sockaddr_in cAddr;
     int cSocLen;
-    char Buf[BUFL];
+    char buf[BUFL];
 
 
     //Creating the socket
-    scSocket = socket (AF_INET, SOCK_STREAM, 0); // AF_INET
-    if (scSocket == -1) {
-        perror ("socServer: socket creation failed");
-        exit (1);
-    }
-
-    //Intialize the socket strucutre
-
-    sAddr.sin_family = AF_INET;
-    sAddr.sin_port = htons (SERVERPORT);
-    sAddr.sin_addr.s_addr = htonl (INADDR_ANY);
+    sSocket = serverSocket(port); // AF_INET
     
+    sigHandler.sa_handler = exitSignalHandler();
 
+    if (sigfillset(&signalHandler.sa_mask) < 0){
+		perror("Signal setting failed.");
+		signalHandler.sa_flags = SA_RESTART;
+	}
 
+	if (sigaction(SIGCHLD, &signalHandler, 0) < 0){
+		perror("Action setting for signal failed.");
+	}
 
+    while(true){
+        cSocket = clientSocket(sSocket);
 
-/*  memset (&sAddr, 0, sizeof (struct sockaddr_in));
-    sAddr.sin_family = AF_INET;
-    sAddr.sin_port = htons (SERVERPORT);
-    sAddr.sin_addr.s_addr = htonl (INADDR_ANY);
-    err = bind (sSocket, (struct sockaddr*)&sAddr,
-    sizeof (struct sockaddr_in));
-    if (err == -1) {
-    perror ("socServer: bind address to socket failed");
-    exit (2);
+        err = fork();
+        if (err < 0){
+            perror("fork failed");
+        } else if (err == 0){
+
+            close(sSocket);
+            execl("./serverG", "serverG", buf, (char *) NULL);
+            exit(0);
+        }
+
+        close(cSocket);
+        ACTIVE_CLIENTS++;
     }
-    err = listen (sSocket, 5);
-    if (err == -1) {
-    perror ("socServer: listen failed");
-    exit (3);
+    return 0;
+}
+
+void exitSignalHandler(){
+    int err;
+
+    while(ACTIVE_CLIENTS > 0){
+        err = waitpid((pid_t) -1, NULL, WNOHANG);
+        if (err < 0){
+            perror("waitpid failed");
+        } else if (err == 0) {
+            break;
+        } else {
+            ACTIVE_CLIENTS--;
+        }
     }
-    cSocket = accept (sSocket, (struct sockaddr *)&cAddr, &cSocLen);
- */
-
-
-
 }

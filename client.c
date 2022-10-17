@@ -29,7 +29,7 @@ int main(int argc, char argv[]){
     int sSock = socket ( AF_INET, SOCK_STREAM, 0); // AF_INET
 
     if (sSock < 0){
-        print_error("failed to open server socket.");
+        perror("failed to open server socket.");
     }
 
     memset(&sAddr, 0, sizeof(sAddr));
@@ -38,10 +38,10 @@ int main(int argc, char argv[]){
     sAddr.sin_port = htons(port);
 
     if(connect(sSock, (struct sockaddr *)&sAddr, sizeof(sAddr))){
-        print_error("failed to connect to server.");
+        perror("failed to connect to server.");
     }
 
-    print_info(" Connection successful.");
+    pinfo(" Connection successful.");
     draw_board(board);
 
     int exit = 0;

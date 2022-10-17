@@ -19,11 +19,14 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <time.h>
 
 #define SERVERPORT 31100
 #define SERVERPORTSTR "31100"
 #define SERVERIP "199.17.28.80"
 #define SERVERNAME "ahscentos"
 #define BUFL 100
+#define MAX_REQ 5
 
 #endif

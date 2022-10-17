@@ -11,62 +11,87 @@
 #include "soc.h"
 #include "shared.h"
 
-int main(int argc, char argv[]){
+int check_board(char board[][3], char p);
 
-    if (argc != 2){
-	    sprintf(stderr,"Usage: %s <CLIENT SOCKET>", argv[0]);
-        exit(1);
-    }
-    int cSock = atoi(argv[1]);
-    int err;
-    char board[3][3] = {{' ',' ',' '},{' ',' ',' '},{' ',' ',' '}};
+int main(int argc, char *argv[]){
+	
+	if (argc != 2){
+		fprintf(stderr,"Usage: %s <CLIENT SOCKET>", argv[0]);
+		exit(1);
+	}
+	
+	int cSocket = atoi(argv[1]);
 
-    //Creating the socket
-    sgSocket = socket  (AF_INET, SOCK_STREAM, 0); // AF_INET
-    if (sgSocket == -1) {
-        perror ("socServer: socket creation failed");
-        exit (1);
-    }
+	pinfo("Game started.");
+	char board[3][3] = {{ ' ', ' ', ' '}, {' ', ' ', ' '}, {' ', ' ', ' '}};
 
-    //Intialize the socket strucutre
-    memset(&sadder,0,sizeof(struct sockadder_ing))
-    sAddr.sin_family = AF_INET;
-    sAddr.sin_port = htons (SERVERPORT);
-    sAddr.sin_addr.s_addr = htonl (INADDR_ANY); 
+	send_int(cSocket, COMMAND_START);
 
-    //Bind the host address using bind
-    if(bind(sgsocket, (struct sockaddr*)&sAddr, sizeof(struct sockadder_in))< 0){
-        perror("Server G: Error on Binding");
-        exit(2);
-    }
+	char prev_turn = PLAYER_COMPUTER;
+	char turn = PLAYER_HUMAN;
+	int turn_count = 0;
+	int game_over_flag = 0;
 
-    //listen from serverC 
-    listen(sgsocket,1);
+	while (!game_over_flag){
+		if (turn == PLAYER_HUMAN){
+			int valid = 0;
+			int move = 0;	
+			while (!valid){
+				if (move == -1) {break};
+				send_int(clientSocket, COMMAND_MOVE);
+				move = receive_int(clientSocket);
+				if ((move == 9) || (board[move/3][move%3] == ' ')){
+					valid = 1;
+				}
+				else{
+					send_int(clientSocket, COMMAND_INVALID);
+				}
+			}
+			if (move == -1) {
+				send_int(clientSocket, COMMAND_LOSE);
+				printf("Player forfeit.\n");
+				break;
+			} else {
+				board[move/3][move%3] = turn;
+				send_int(clientSocket, COMMAND_UPDATE);
+				send_int(clientSocket, (int)PLAYER_HUMAN);
+				send_int(clientSocket, move);
+			
+				int playerWins = check_board(board, PLAYER_HUMAN);
+				if (playerWins>0){
+					printf("Human won.\n");
+					game_over_flag = 1;
+					send_int(clientSocket, COMMAND_WIN);
+				}
+			}
+		} else {
+			int move = get_random_move(board);	
+			board[move/3][move%3] = turn;
+			send_int(clientSocket, COMMAND_UPDATE);
+			send_int(clientSocket, (int)PLAYER_COMPUTER);
+			send_int(clientSocket, move);
+		
+			int computerWins = check_board(board, PLAYER_COMPUTER);
+			if (computerWins>0)
+			{
+		
+				printf("Computer won.\n");
+				game_over_flag = 1;
+				send_int(clientSocket, COMMAND_LOSE);
+			}
+		}
 
-    //error checking for listen
-    if(listen(sgsocket, (struct sockaddr*)&sAddr, sizeof(struct sockadder_in))< 0)
-    {
-        perror("ServerG: Error on Listen");
-        exit(3);
-    }
-    //accept to send information to client Interface
-    accept (sgsocket, (struct sockaddr *)&cAddr, &cSocLen);
-
-    //error checking for accepts
-    if(accept(sgsocket, (struct sockaddr*)&cAddr, sizeof(struct sockadder_in))< 0)
-    {
-        perror("Server G: Error on Accept");
-        exit(4);
-    }
-    
-    //recieve in client
-    recieve (scsocket, (struct sockaddr *)&cAddr, &cSocLen);
-      
-      //error checking for recieve
-    if(recieve(scsocket, (struct sockaddr*)&cAddr, sizeof(struct sockadder_in))< 0)
-    {
-        perror("Server G: Error on Recieve");
-        exit(4);
-    }
-
+		if (game_over_flag == 0 && turn_count == 8){
+			printf("Draw.\n");
+			send_int(clientSocket, COMMAND_DRAW);
+			game_over_flag = 1;
+		}
+        
+		char tempPlayer = prev_turn;
+		prev_turn = turn;
+		turn = tempPlayer;
+		turn_count++;
+	}
+	/* Close client socket */
+	close(clientSocket);		
 }

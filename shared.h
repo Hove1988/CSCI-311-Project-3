@@ -21,9 +21,7 @@
 #define PLAYER_COMPUTER 'O'
 #define PLAYER_HUMAN 'X'
 
-
-void print_info(const char *msg);
-void print_error(const char *msg);
+void pinfo(const char *msg);
 void draw_board(char board[][3]);
 int get_random_move(char board[][3]);
 int check_board(char board[][3], char p);

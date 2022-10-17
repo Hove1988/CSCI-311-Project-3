@@ -7,46 +7,41 @@
  *  Authors: Jacob Haapoja, Joseph Hoversten, Faysal Osman, Matthew Xiong
  *  Class: CSCI 311
  * 
-*********************************************************************************/
+********************************************************************************/
 
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include "soc.h"
+#include "shared.h"
 
 
-int ServerSocket( int serverPort){
+int serverSocket( int port){
     int sSocket;
-    sSocket = socket ( AF_INET, SOCK_STREAM, 0); 
-    if (sSocket == -1) {
-     perror ("socserver: socket creation failed");
-     exit (1);
+    struct sockaddr_in sAddr;
+     
+    if (sSocket = socket ( AF_INET, SOCK_STREAM, 0) < 0) {
+        perror ("socserver: socket creation failed");
     }
 
+    memset(&serverAddress, 0, sizeof(serverAddress)); // Empty
+	serverAddress.sin_family = AF_INET;
+	serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);
+	serverAddress.sin_port = htons(port);
+	
+    if (bind(serverSocket, (struct sockaddr*) &serverAddress, sizeof(serverAddress)) < 0){
+		display_error("Bind failed.");
+    }
+    return sSocket;
 }
 
-int ClientSocket(int serverPort){
-    int err;
-    int sSocket;
+int clientSocket(int serverPort){
+    
     int cSocket;
-    int cSocLen;
-    char Buf[BUFL];
-    struct addrinfo criteria; //idk what this does..
-    struct addrinfo *serverResult; //idk what this does..
+    struct sockaddr_in cAddr;
+    unsigned int cLen = sizeof(cAddr);
 
-//
-cSocket = socket ( AF_INET, SOCK_STREAM, 0); 
-if (cSocket == -1) {
-    perror ("socClient: socket creation failed");
-    exit (1);
+    cSocket = accept(serverSocket, (struct sockaddr *) &cAddr, &cLen); 
+    if (cSocket == -1) {
+        perror ("failed to connect to client");
+        exit (1);
+    }
+    return cSocket;
 }
-}
-
-/*
-err = connect (cSocket, serverResult->ai_addr,sizeof(struct sockaddr_in));
-if (err == -1) {
-    perror ("socClient: connect failed");
-    exit (3);
-}
-freeaddrinfo (serverResult);
-*/

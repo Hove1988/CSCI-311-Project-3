@@ -8,25 +8,13 @@
  * 
 *********************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/socket.h>
-#include <time.h>
-#include <unistd.h>
+#include "soc.h"
 #include "shared.h"
 
-void print_info(const char *msg){
+void pinfo(const char *msg){
     printf("[INFO]: ");
     printf(msg);
     printf("\n");
-}
-
-void print_error(const char *msg)
-{
-    printf("[ERROR]: %s", msg);
-    perror(msg);
-    exit(1);
 }
 
 void draw_board(char board[][3]){
@@ -85,41 +73,41 @@ void update_board(char board[][3], int location, char player){
     board[location/3][location%3] = player;
     char* msg = "Board updated at location X.";
     msg[26] = location + '0';
-    print_info(msg);
+    pinfo(msg);
 }
 
 void get_msg(int socket, char* message){
     memset(message, 0, 2);
-    int err = read(socket, message, 1);
+    int err = recv(socket, message, BUFL, 0);
     if (err !=1){
-        print_error("Failed to read message.");
-        print_info("Read message successfully.");
+        perror("Failed to read message.");
+        pinfo("Read message successfully.");
     }
 }
 
 int get_int(int socket){
     int message = 0;
-    int err = read(socket, &message, sizeof(int));
+    int err = recv(socket, &message, sizeof(int), 0);
     if (err < 0 || err != sizeof(int)){
-        print_error("Failed to read int.");
+        perror("Failed to read int.");
     }
-    print_info("Read int successfully.");
+    pinfo("Read int successfully.");
     return message;
 }
 
 void send_msg(int socket, char* message){
-    int err = write(socket, message, strlen(message));
+    int err = send(socket, message, strlen(message), 0);
     if (err < 0){
-        print_error("Failed to send message.");
+        perror("Failed to send message.");
     }
 }
 
 void send_int(int socket, int message)
 {
-    int err = write(socket, &message, sizeof(int));
+    int err = send(socket, &message, sizeof(int), 0);
     if (err < 0){
-        print_error("Failed to send int.");
+        perror("Failed to send int.");
     }
-    print_info("Sent int successfully.");
+    pinfo("Sent int successfully.");
 }
 
