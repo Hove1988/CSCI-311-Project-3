@@ -55,9 +55,14 @@ int main(int argc, char *argv[]){
     }
 
     while(1){
+        err = -1;
+        pinfo("Waiting for Connection...\n");
         cSocket = clientSocket(sSocket);
         sprintf(buf, "%d", cSocket);
-        err = fork();
+        if (cSocket >= 0){
+            err = fork();
+            ACTIVE_CLIENTS++;
+        }
         if (err < 0){
             perror("fork failed");
         } else if (err == 0){
@@ -67,7 +72,6 @@ int main(int argc, char *argv[]){
         }
         memset(buf, 0, BUFL);
         close(cSocket);
-        ACTIVE_CLIENTS++;
     }
     return 0;
 }

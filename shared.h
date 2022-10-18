@@ -127,7 +127,8 @@ void get_msg(int socket, char* message){
 int get_int(int socket){
     int message = 0;
     int err = recv(socket, &message, sizeof(int), 0);
-    if (err < 0 || err != sizeof(int)){
+    if (err < 0)  //|| err != sizeof(int)
+    {
         perror("Failed to read int.");
     } else {
         pinfo("Read int successfully.");

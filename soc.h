@@ -37,6 +37,7 @@ int serverSocket(int port){
      
     if ((sSocket = socket ( AF_INET, SOCK_STREAM, 0)) < 0) {
         perror ("socserver: socket creation failed");
+        exit(0);
     }
 
     memset(&sAddr, 0, sizeof(struct sockaddr_in)); // Empty
@@ -47,6 +48,7 @@ int serverSocket(int port){
 	//bind(serverSocket, (struct sockaddr*) &sAddr, sizeof(sAddrn));
     if (bind(sSocket, (struct sockaddr*) &sAddr, sizeof(sAddr)) == -1){
 		perror("Bind failed.");
+        exit(0);
     }
 
     return sSocket;
@@ -57,10 +59,10 @@ int clientSocket(int sSocket){
     int cSocket;
     struct sockaddr_in cAddr;
     unsigned int cLen = sizeof(cAddr);
-  
     cSocket = accept(sSocket, (struct sockaddr *) &cAddr, &cLen); 
     if (cSocket == -1) {
         perror ("failed to connect to client");
+        exit(0);
     }
     return cSocket;
 }
