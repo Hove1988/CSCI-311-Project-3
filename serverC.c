@@ -12,15 +12,17 @@
 #include "shared.h"
 
 void exitSignalHandler();
+int serverSocket(int port);
+int clientSocket(int sSocket);
 unsigned int ACTIVE_CLIENTS = 0;
 
-int main(int argc, char argv[]){
+int main(int argc, char *argv[]){
 
     if (argc != 2){
 	fprintf(stderr,"Usage: %s <SERVER PORT>\n", argv[0]);
 		exit(1);
     }
-//General Delcaring variables.
+//General Declaring variables.
     int err;
     int sSocket; // server socket
     int cSocket; // client socket
@@ -37,20 +39,24 @@ int main(int argc, char argv[]){
     //Creating the socket
     sSocket = serverSocket(port); // AF_INET
     
-    sigHandler.sa_handler = exitSignalHandler();
+    sigHandler.sa_handler = exitSignalHandler;
 
-    if (sigfillset(&signalHandler.sa_mask) < 0){
+    if (sigfillset(&sigHandler.sa_mask) < 0){
 		perror("Signal setting failed.");
-		signalHandler.sa_flags = SA_RESTART;
+		sigHandler.sa_flags = SA_RESTART;
 	}
 
-	if (sigaction(SIGCHLD, &signalHandler, 0) < 0){
+	if (sigaction(SIGCHLD, &sigHandler, 0) < 0){
 		perror("Action setting for signal failed.");
 	}
 
-    while(true){
-        cSocket = clientSocket(sSocket);
+    if (listen(sSocket, MAX_REQ) < 0){
+        perror("server socket listen failed");
+    }
 
+    while(1){
+        cSocket = clientSocket(sSocket);
+        sprintf(buf, "%d", cSocket);
         err = fork();
         if (err < 0){
             perror("fork failed");
@@ -58,9 +64,8 @@ int main(int argc, char argv[]){
 
             close(sSocket);
             execl("./serverG", "serverG", buf, (char *) NULL);
-            exit(0);
         }
-
+        memset(buf, 0, BUFL);
         close(cSocket);
         ACTIVE_CLIENTS++;
     }
@@ -81,3 +86,4 @@ void exitSignalHandler(){
         }
     }
 }
+

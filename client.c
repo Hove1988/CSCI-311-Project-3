@@ -14,7 +14,7 @@
 void get_board_update(int serverSocket, char board[][3]);
 void make_move(int serverSocket);
 
-int main(int argc, char argv[]){
+int main(int argc, char *argv[]){
 
     if (argc < 2) {
         fprintf(stderr, "Usage: %s <Server IP> <Server Port>\n", argv[0]);
@@ -40,17 +40,22 @@ int main(int argc, char argv[]){
 
     if(connect(sSock, (struct sockaddr *)&sAddr, sizeof(sAddr))){
         perror("failed to connect to server.");
+    } else {
+        pinfo(" Connection successful.");
     }
-
-    pinfo(" Connection successful.");
+    
     draw_board(board);
 
-    int msg;
+    int cmd;
     int exit = 0;
+    char msg[BUFL];
+
     while(!exit){
-        msg = get_int(sSock);
-        switch (msg){
+        cmd = get_int(sSock);
+        switch (cmd){
             case COMMAND_DRAW:
+                get_msg(sSock, msg);
+                printf(msg);
                 printf("You tied!\n");
                 exit = 1;
                 break;
@@ -62,6 +67,8 @@ int main(int argc, char argv[]){
                 printf("That move is invalid.\n");
                 break;
             case COMMAND_LOSE:
+                get_msg(sSock, msg);
+                printf(msg);
                 printf("You lost.\n");
                 exit = 1;
                 break;
@@ -77,6 +84,7 @@ int main(int argc, char argv[]){
                 draw_board(board);
                 break;
             case COMMAND_WIN:
+                get_msg(sSock, msg);
                 printf("You win!\n");
                 exit = 1;
                 break;
@@ -115,8 +123,7 @@ void make_move(int serverSocket){
 
     printf("Enter 0-8 to make a move, 9 to forfeit.\n");
     fgets(buffer, 10, stdin);
-    int move = stoi(buffer);
+    int move = atoi(buffer);
     send_int(serverSocket, move);
-
 }
 

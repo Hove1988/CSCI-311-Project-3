@@ -115,10 +115,11 @@ void update_board(char board[][3], int location, char player){
 }
 
 void get_msg(int socket, char* message){
-    memset(message, 0, 2);
+    memset(message, 0, BUFL);
     int err = recv(socket, message, BUFL, 0);
-    if (err !=1){
+    if (err < 0){
         perror("Failed to read message.");
+    } else {
         pinfo("Read message successfully.");
     }
 }
@@ -128,8 +129,9 @@ int get_int(int socket){
     int err = recv(socket, &message, sizeof(int), 0);
     if (err < 0 || err != sizeof(int)){
         perror("Failed to read int.");
+    } else {
+        pinfo("Read int successfully.");
     }
-    pinfo("Read int successfully.");
     return message;
 }
 
@@ -137,16 +139,18 @@ void send_msg(int socket, char* message){
     int err = send(socket, message, strlen(message), 0);
     if (err < 0){
         perror("Failed to send message.");
+    } else {
+        pinfo("Sent msg successfully");
     }
 }
 
-void send_int(int socket, int message)
-{
+void send_int(int socket, int message){
     int err = send(socket, &message, sizeof(int), 0);
     if (err < 0){
         perror("Failed to send int.");
+    } else {
+        pinfo("Sent int successfully.");
     }
-    pinfo("Sent int successfully.");
 }
 
 #endif
