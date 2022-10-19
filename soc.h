@@ -31,21 +31,25 @@
 #define MAX_REQ 5
 
 int serverSocket(int port){
+
+    //Local variables
     int sSocket;
     int err;
     struct sockaddr_in sAddr;
      
+    //Create socket for incoming connections 
     if ((sSocket = socket ( AF_INET, SOCK_STREAM, 0)) < 0) {
         perror ("socserver: socket creation failed");
         exit(0);
     }
 
-    memset(&sAddr, 0, sizeof(struct sockaddr_in)); // Empty
-	sAddr.sin_family = AF_INET;
-    sAddr.sin_port = htons(port);
-	sAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    //Construct local adress structure
+    memset(&sAddr, 0, sizeof(struct sockaddr_in));      //Zero out structure
+	sAddr.sin_family = AF_INET;                         //IPv4 address family
+    sAddr.sin_port = htons(port);                       //Local port
+	sAddr.sin_addr.s_addr = htonl(INADDR_ANY);          //Any incoming address
     
-	//bind(serverSocket, (struct sockaddr*) &sAddr, sizeof(sAddrn));
+	//Bind to the local address
     if (bind(sSocket, (struct sockaddr*) &sAddr, sizeof(sAddr)) == -1){
 		perror("Bind failed.");
         exit(0);
@@ -56,14 +60,19 @@ int serverSocket(int port){
 
 int clientSocket(int sSocket){
     
+    //Local variables
     int cSocket;
     struct sockaddr_in cAddr;
     unsigned int cLen = sizeof(cAddr);
+    
+    //Wait for client to connect
     cSocket = accept(sSocket, (struct sockaddr *) &cAddr, &cLen); 
+
+    //Checks client socket and see if it is able to connect
     if (cSocket == -1) {
         perror ("failed to connect to client");
-        exit(0);
     }
+    
     return cSocket;
 }
 

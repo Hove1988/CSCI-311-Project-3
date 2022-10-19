@@ -108,7 +108,7 @@ void get_board_update(int serverSocket, char board[][3]){
 
 }
 
-void make_move(int serverSocket){
+void make_move(int sSocket){
 
     char buffer[10];
     int i = 0;
@@ -124,6 +124,6 @@ void make_move(int serverSocket){
     printf("Enter 0-8 to make a move, 9 to forfeit.\n");
     fgets(buffer, 10, stdin);
     int move = atoi(buffer);
-    send_int(serverSocket, move);
+    send_int(sSocket, move);
 }
 

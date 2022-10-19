@@ -61,20 +61,8 @@ void draw_board(char board[][3]){
 int get_random_move(char board[][3]){
     time_t t;
     srand((uint)time(&t));
-    int move_count = 0, i = 0, j = 0;
-    int buffer[9];
-
-    while (i<3){
-        while (j<3){
-            if (board[i][j]==' '){
-                buffer[move_count++] = i*3+j;
-            }
-            j++;
-        }
-        i++;
-    }
-
-    return buffer[rand() % move_count];
+    int randMove = rand() % 9;
+    return randMove;
 }
 
 int check_board(char board[][3], char p){
@@ -127,7 +115,7 @@ void get_msg(int socket, char* message){
 int get_int(int socket){
     int message = 0;
     int err = recv(socket, &message, sizeof(int), 0);
-    if (err < 0)  //|| err != sizeof(int)
+    if (err < 0)
     {
         perror("Failed to read int.");
     } else {

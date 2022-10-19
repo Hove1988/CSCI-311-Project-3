@@ -59,24 +59,28 @@ int main(int argc, char *argv[]){
         pinfo("Waiting for Connection...\n");
         cSocket = clientSocket(sSocket);
         sprintf(buf, "%d", cSocket);
-        if (cSocket >= 0){
+        if (cSocket > 0){
             err = fork();
             ACTIVE_CLIENTS++;
         }
+
         if (err < 0){
             perror("fork failed");
         } else if (err == 0){
-
             close(sSocket);
             execl("./serverG", "serverG", buf, (char *) NULL);
         }
+
         memset(buf, 0, BUFL);
         close(cSocket);
     }
+
+
     return 0;
 }
 
 void exitSignalHandler(){
+    //Local Variable
     int err;
 
     while(ACTIVE_CLIENTS > 0){

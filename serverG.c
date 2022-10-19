@@ -14,24 +14,25 @@
 int check_board(char board[][3], char p);
 
 int main(int argc, char *argv[]){
-	
+
 	if (argc != 2){
 		fprintf(stderr,"Usage: %s <CLIENT SOCKET>", argv[0]);
 		exit(1);
 	}
-	
+
+	//Declaration of variables
+	char prev_turn = PLAYER_COMPUTER;
+	char turn = PLAYER_HUMAN;
+	int turn_count = 0;
+	int game_over_flag = 0;
+	char msg[BUFL];
+
 	int cSocket = atoi(argv[1]);
 
 	pinfo("Game started.");
 	char board[3][3] = {{ ' ', ' ', ' '}, {' ', ' ', ' '}, {' ', ' ', ' '}};
 
 	send_int(cSocket, COMMAND_START);
-
-	char prev_turn = PLAYER_COMPUTER;
-	char turn = PLAYER_HUMAN;
-	int turn_count = 0;
-	int game_over_flag = 0;
-	char msg[BUFL];
 
 	while (!game_over_flag){
 		if (turn == PLAYER_HUMAN){
@@ -70,7 +71,10 @@ int main(int argc, char *argv[]){
 				}
 			}
 		} else {
-			int move = get_random_move(board);	
+			int move;
+			do{
+				move = get_random_move(board);
+			} while ( board[move/3][move%3] != ' ');
 			board[move/3][move%3] = turn;
 			send_int(cSocket, COMMAND_UPDATE);
 			send_int(cSocket, (int)PLAYER_COMPUTER);
