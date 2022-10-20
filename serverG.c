@@ -81,8 +81,7 @@ int main(int argc, char *argv[]){
 			send_int(cSocket, move);
 		
 			int computerWins = check_board(board, PLAYER_COMPUTER);
-			if (computerWins>0)
-			{
+			if (computerWins>0){
 		
 				sprintf(msg, "Computer won.\n");
 				printf(msg, "Computer won.\n");
